@@ -1,0 +1,60 @@
+:root {
+  /* Colores principales */
+  --color-primary:        #FF5C00;
+  --color-primary-dark:   #C0390A;
+  --color-primary-light:  #FF8C4A;
+  --color-secondary:      #FFD700;
+  --color-secondary-dark: #B8960A;
+  --color-tertiary:       #1A1A1B;
+  --color-neutral:        #F8F9FA;
+
+  /* Superficies y fondos */
+  --color-bg:             #F8F9FA;
+  --color-surface:        #FFFFFF;
+  --color-border:         #E5E5E5;
+
+  /* Texto */
+  --color-text:           #1A1A1B;
+  --color-text-muted:     #6B6B6B;
+  --color-text-light:     #9E9E9E;
+
+  /* Tipografías */
+  --font-heading:         'Bricolage Grotesque', sans-serif;
+  --font-body:            'Hanken Grotesk', sans-serif;
+
+  /* Tamaños de fuente */
+  --text-xs:    12px;
+  --text-sm:    14px;
+  --text-base:  16px;
+  --text-lg:    18px;
+  --text-xl:    22px;
+  --text-2xl:   28px;
+  --text-3xl:   36px;
+
+  /* Espaciados */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+
+  /* Bordes */
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-full: 999px;
+
+  /* Sombras */
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.14);
+
+  /* Bottom nav altura */
+  --bottom-nav-height: 64px;
+
+  /* Breakpoints (referencia, usar en media queries) */
+  /* sm: 480px | md: 768px | lg: 1024px | xl: 1280px */
+}

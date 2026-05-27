@@ -1,0 +1,27 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: var(--color-surface);
+  position: relative;
+}
+
+.layout__main {
+  flex: 1;
+  padding-bottom: var(--bottom-nav-height);
+  overflow-x: hidden;
+}
+
+/* Tablet y escritorio — la app se centra como móvil */
+@media (min-width: 768px) {
+  .layout {
+    box-shadow: 0 0 40px rgba(0,0,0,0.12);
+    min-height: 100vh;
+  }
+
+  body {
+    background-color: var(--color-neutral);
+  }
+}
