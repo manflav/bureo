@@ -2,8 +2,6 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
   background-color: var(--color-surface);
   position: relative;
 }
@@ -14,14 +12,28 @@
   overflow-x: hidden;
 }
 
-/* Tablet y escritorio — la app se centra como móvil */
+/* Tablet */
 @media (min-width: 768px) {
-  .layout {
-    box-shadow: 0 0 40px rgba(0,0,0,0.12);
-    min-height: 100vh;
+  .layout__main {
+    max-width: 768px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  body {
-    background-color: var(--color-neutral);
+  .bottom-nav {
+    max-width: 768px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .layout__main {
+    max-width: 1024px;
+  }
+
+  .bottom-nav {
+    max-width: 1024px;
   }
 }
