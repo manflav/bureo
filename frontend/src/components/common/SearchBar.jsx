@@ -1,6 +1,6 @@
 import './SearchBar.css'
 
-export default function SearchBar({ placeholder = 'Buscar ferias, ciudades o fechas...' }) {
+export default function SearchBar({ value = '', onChange, placeholder = 'Buscar ferias, ciudades o fechas...' }) {
   return (
     <div className="searchbar">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -11,6 +11,8 @@ export default function SearchBar({ placeholder = 'Buscar ferias, ciudades o fec
         type="text"
         placeholder={placeholder}
         className="searchbar__input"
+        value={value}
+        onChange={e => onChange?.(e.target.value)}
       />
     </div>
   )
