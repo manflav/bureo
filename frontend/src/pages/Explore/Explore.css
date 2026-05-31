@@ -2,10 +2,122 @@
   padding-bottom: var(--space-8);
 }
 
+/* ── En este momento ── */
+.en-curso {
+  padding: var(--space-5) 0 var(--space-2);
+}
+
+.en-curso__titulo {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.en-curso__carrusel {
+  display: flex;
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.en-curso__carrusel::-webkit-scrollbar { display: none; }
+
+.en-curso__card {
+  position: relative;
+  flex-shrink: 0;
+  width: 180px;
+  height: 240px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.en-curso__card:hover {
+  transform: scale(1.02);
+}
+
+.en-curso__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.en-curso__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.8) 0%,
+    rgba(0,0,0,0.2) 50%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+.en-curso__badge {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  background: var(--color-secondary);
+  color: var(--color-tertiary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.en-curso__info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-3);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.en-curso__nombre {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: white;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.3;
+}
+
+.en-curso__lugar,
+.en-curso__fecha {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.85);
+}
+
 /* ── Hero ── */
+.hero-section {
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.hero-section__titulo {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+}
+
 .hero-card {
   position: relative;
-  margin: 0 var(--space-4);
   border-radius: var(--radius-lg);
   overflow: hidden;
   height: 280px;
@@ -100,7 +212,7 @@
   background-color: #FFF2EC;
 }
 
-/* ── Próximas fiestas ── */
+/* ── Eventos destacados ── */
 .proximas {
   padding: 0 var(--space-4);
   margin-bottom: var(--space-6);
@@ -190,11 +302,24 @@
   margin-bottom: var(--space-6);
 }
 
+.provincias__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
 .provincias__titulo {
   font-family: var(--font-heading);
   font-size: var(--text-xl);
   font-weight: 700;
-  margin-bottom: var(--space-4);
+}
+
+.provincias__reset {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
 }
 
 .provincias__grid {
@@ -236,57 +361,46 @@
   letter-spacing: .1em;
 }
 
-/* ── Responsive tablet ── */
-@media (min-width: 768px) {
-  .hero-card {
-    height: 360px;
-  }
-
-  .provincias__grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .provincias__item {
-    height: 160px;
-  }
-
-  .proximas__card {
-    width: 220px;
-  }
-
-  .proximas__img-wrap {
-    height: 170px;
-  }
+.provincias__item--activo .provincias__nombre {
+  background: rgba(255, 92, 0, 0.6);
 }
 
-/* ── Responsive desktop ── */
+.provincias__item--activo {
+  outline: 3px solid var(--color-primary);
+}
+
+/* ── TABLET (≥ 768px) ── */
+@media (min-width: 768px) {
+
+  .en-curso__titulo { padding: 0 var(--space-4); }
+  .en-curso__carrusel { padding: 0 var(--space-4); }
+  .en-curso__card { width: 200px; height: 267px; }
+
+  .hero-card { height: 360px; }
+
+  .provincias__grid { grid-template-columns: repeat(4, 1fr); }
+  .provincias__item { height: 160px; }
+
+  .proximas__card { width: 220px; }
+  .proximas__img-wrap { height: 170px; }
+}
+
+/* ── DESKTOP (≥ 1024px) ── */
 @media (min-width: 1024px) {
-  .hero-card {
-    height: 420px;
-    margin: 0 var(--space-8);
-  }
 
-  .proximas {
-    padding: 0 var(--space-8);
-  }
+  .en-curso__titulo { padding: 0 var(--space-8); }
+  .en-curso__carrusel { padding: 0 var(--space-8); }
+  .en-curso__card { width: 220px; height: 293px; }
 
-  .provincias {
-    padding: 0 var(--space-8);
-  }
+  .hero-section { padding: 0 var(--space-8); }
+  .hero-card { height: 420px; }
 
-  .categorias {
-    padding: var(--space-5) var(--space-8);
-  }
+  .categorias { padding: var(--space-5) var(--space-8); }
 
-  .proximas__card {
-    width: 260px;
-  }
+  .proximas { padding: 0 var(--space-8); }
+  .proximas__card { width: 260px; }
+  .proximas__img-wrap { height: 200px; }
 
-  .proximas__img-wrap {
-    height: 200px;
-  }
-
-  .provincias__item {
-    height: 200px;
-  }
+  .provincias { padding: 0 var(--space-8); }
+  .provincias__item { height: 200px; }
 }

@@ -11,3 +11,5 @@ export const getFiestaById    = (id) => get(`/fiestas/${id}`)
 export const getFiestasDestacadas = ()  => get('/fiestas/destacadas')
 export const getProvincias    = ()      => get('/provincias')
 export const getCategorias    = ()      => get('/categorias')
+
+export const getFiestasEnCurso = () => get('/fiestas/en-curso')

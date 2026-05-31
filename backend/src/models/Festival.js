@@ -17,10 +17,18 @@ export const Festival = {
     const params = []
     let i = 1
 
-    if (filters.fecha) {
-      sql += ` AND f.fecha_inicio <= $${i} AND (f.fecha_fin IS NULL OR f.fecha_fin >= $${i})`
-      params.push(filters.fecha)
-      i++
+    if (filters.fecha_inicio && filters.fecha_fin) {
+    sql += ` AND f.fecha_inicio >= $${i} AND f.fecha_fin <= $${i+1}`
+    params.push(filters.fecha_inicio, filters.fecha_fin)
+    i += 2
+    } else if (filters.fecha_inicio) {
+    sql += ` AND f.fecha_fin >= $${i}`
+    params.push(filters.fecha_inicio)
+    i++
+    } else if (filters.fecha_fin) {
+    sql += ` AND f.fecha_inicio <= $${i}`
+    params.push(filters.fecha_fin)
+    i++
     }
     if (filters.provincia) {
       sql += ` AND p.nombre ILIKE $${i}`
@@ -89,5 +97,36 @@ export const Festival = {
       ORDER BY f.fecha_inicio ASC
     `)
     return result.rows
-  }
+  },
+
+  findEnCurso: async () => {
+    const hoy = new Date().toISOString().slice(0, 10)
+    const result = await pool.query(`
+      SELECT f.*,
+            m.nombre as municipio,
+            p.nombre as provincia,
+            c.nombre as categoria
+      FROM fiestas f
+      JOIN municipios m ON f.municipio_id = m.id
+      JOIN provincias p ON m.provincia_id = p.id
+      JOIN categorias c ON f.categoria_id = c.id
+      WHERE f.fecha_inicio <= $1 AND (f.fecha_fin >= $1 OR f.fecha_fin IS NULL)
+      ORDER BY f.fecha_inicio ASC
+    `, [hoy])
+    return result.rows
+  },
+
+  findGastronomia: async (id) => {
+    const result = await pool.query(
+      'SELECT * FROM gastronomia WHERE fiesta_id = $1', [id]
+    )
+    return result.rows
+  },
+
+  findVestimenta: async (id) => {
+    const result = await pool.query(
+      'SELECT * FROM vestimenta WHERE fiesta_id = $1', [id]
+    )
+    return result.rows
+  },
 }

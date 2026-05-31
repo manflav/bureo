@@ -9,7 +9,7 @@ import Point from 'ol/geom/Point'
 import { Style, Circle, Fill, Stroke } from 'ol/style'
 import XYZ from 'ol/source/XYZ'
 import { fromLonLat } from 'ol/proj'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { IMAGENES_CATEGORIAS } from '../../utils/categoriaImagenes'
 import { getFiestas, getCategorias, getProvincias } from '../../services/festivalsService'
 import 'ol/ol.css'
@@ -45,6 +45,7 @@ export default function Mapa() {
   const filtrosRefMovil   = useRef(null)
   const filtrosRefDesktop = useRef(null)
   const navigate          = useNavigate()
+  const location          = useLocation()
 
   const [fiestas, setFiestas]                       = useState([])
   const [fiestaSeleccionada, setFiestaSeleccionada] = useState(null)
@@ -64,12 +65,9 @@ export default function Mapa() {
       if (e.target.type === 'date') return
       if (e.target.closest('.mapa-filtros__dropdown--fecha')) return
       if (e.target.closest('.mapa-filtros__dropdown')) return
-
       const dentroMovil   = filtrosRefMovil.current?.contains(e.target)
       const dentroDesktop = filtrosRefDesktop.current?.contains(e.target)
-      if (!dentroMovil && !dentroDesktop) {
-        setDesplegable(null)
-      }
+      if (!dentroMovil && !dentroDesktop) setDesplegable(null)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -85,10 +83,8 @@ export default function Mapa() {
   const ajustarVistaFiestas = (data) => {
     setTimeout(() => {
       if (!mapInstance.current || data.length === 0) return
-
       const conCoords = data.filter(f => f.lng && f.lat)
       if (conCoords.length === 0) return
-
       if (conCoords.length === 1) {
         mapInstance.current.getView().animate({
           center: fromLonLat([parseFloat(conCoords[0].lng), parseFloat(conCoords[0].lat)]),
@@ -97,19 +93,16 @@ export default function Mapa() {
         })
         return
       }
-
       const lngs   = conCoords.map(f => parseFloat(f.lng))
       const lats   = conCoords.map(f => parseFloat(f.lat))
       const minLng = Math.min(...lngs)
       const maxLng = Math.max(...lngs)
       const minLat = Math.min(...lats)
       const maxLat = Math.max(...lats)
-
       const extent = [
         ...fromLonLat([minLng, minLat]),
         ...fromLonLat([maxLng, maxLat]),
       ]
-
       mapInstance.current.getView().fit(extent, {
         padding: [60, 60, 60, 60],
         duration: 800,
@@ -120,17 +113,50 @@ export default function Mapa() {
 
   // Cargar fiestas con filtros
   useEffect(() => {
-    const filters = {}
+    const filters  = {}
+    const params   = new URLSearchParams(location.search)
+    const fiestaId = params.get('fiesta')
+
     if (categoriaActiva) filters.categoria    = categoriaActiva
     if (provinciaActiva) filters.provincia    = provinciaActiva
     if (fechaInicio)     filters.fecha_inicio = fechaInicio
     if (fechaFin)        filters.fecha_fin    = fechaFin
+
     getFiestas(filters).then(data => {
       setFiestas(data)
-      if (data.length > 0) setFiestaSeleccionada(data[0])
-      ajustarVistaFiestas(data)
+      // Solo seleccionar el primero si NO venimos de un detalle
+      if (data.length > 0 && !fiestaId) setFiestaSeleccionada(data[0])
+      if (!fiestaId) ajustarVistaFiestas(data)
     })
-  }, [categoriaActiva, provinciaActiva, fechaInicio, fechaFin])
+  }, [categoriaActiva, provinciaActiva, fechaInicio, fechaFin, location.search])
+
+  // Seleccionar fiesta desde URL param — espera a que fiestas estén cargadas
+  useEffect(() => {
+    const params   = new URLSearchParams(location.search)
+    const fiestaId = params.get('fiesta')
+    if (!fiestaId || fiestas.length === 0) return
+    const f = fiestas.find(f => String(f.id) === fiestaId)
+    if (!f) return
+    setTimeout(() => {
+      setFiestaSeleccionada(f)
+      setPopupVisible(true)
+      if (mapInstance.current && f.lng && f.lat) {
+        mapInstance.current.getView().animate({
+          center: fromLonLat([parseFloat(f.lng), parseFloat(f.lat)]),
+          zoom: 12,
+          duration: 800,
+        })
+      }
+      if (vectorSourceRef.current) {
+        vectorSourceRef.current.getFeatures().forEach(feat => {
+          if (feat.get('fiesta')) feat.setStyle(ESTILO_NORMAL)
+        })
+        vectorSourceRef.current.getFeatures().forEach(feat => {
+          if (feat.get('fiesta')?.id === f.id) feat.setStyle(ESTILO_ACTIVO)
+        })
+      }
+    }, 600)
+  }, [location.search, fiestas])
 
   // Inicializar mapa
   useEffect(() => {
@@ -138,7 +164,6 @@ export default function Mapa() {
       source: new XYZ({ url: CAPAS[0].url })
     })
     tileLayerRef.current = tileLayer
-
     const map = new Map({
       target: mapRef.current,
       layers: [tileLayer],
@@ -161,15 +186,12 @@ export default function Mapa() {
   // Actualizar pins
   useEffect(() => {
     if (!mapInstance.current) return
-
     if (vectorSourceRef.current) {
       vectorSourceRef.current.getFeatures()
         .filter(f => f.get('fiesta'))
         .forEach(f => vectorSourceRef.current.removeFeature(f))
     }
-
     if (fiestas.length === 0) return
-
     const features = fiestas
       .filter(f => f.lng && f.lat)
       .map(f => {
@@ -180,24 +202,18 @@ export default function Mapa() {
         feature.setStyle(ESTILO_NORMAL)
         return feature
       })
-
     if (!vectorSourceRef.current) {
       const vectorSource = new VectorSource({ features })
       vectorSourceRef.current = vectorSource
       const vectorLayer = new VectorLayer({ source: vectorSource })
       mapInstance.current.addLayer(vectorLayer)
-
       mapInstance.current.on('click', (e) => {
         const hit = mapInstance.current.forEachFeatureAtPixel(e.pixel, (feature) => {
           const fiesta = feature.get('fiesta')
-          if (fiesta) {
-            seleccionarFiesta(fiesta)
-            return true
-          }
+          if (fiesta) { seleccionarFiesta(fiesta); return true }
         })
         if (!hit) setPopupVisible(false)
       })
-
       mapInstance.current.on('pointermove', (e) => {
         const hit = mapInstance.current.hasFeatureAtPixel(e.pixel)
         mapInstance.current.getTargetElement().style.cursor = hit ? 'pointer' : ''
@@ -205,7 +221,6 @@ export default function Mapa() {
     } else {
       features.forEach(f => vectorSourceRef.current.addFeature(f))
     }
-
     features[0]?.setStyle(ESTILO_ACTIVO)
   }, [fiestas])
 

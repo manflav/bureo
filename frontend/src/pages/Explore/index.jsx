@@ -6,28 +6,28 @@ import { IMAGENES_CATEGORIAS } from '../../utils/categoriaImagenes'
 import {
   getFiestasDestacadas,
   getFiestas,
-  getCategorias
+  getCategorias,
+  getFiestasEnCurso,
 } from '../../services/festivalsService'
 
 export default function Explorar() {
-  const [categorias, setCategorias]         = useState([])
+  const [categorias, setCategorias]           = useState([])
   const [categoriaActiva, setCategoriaActiva] = useState(null)
-  const [fiestas, setFiestas]               = useState([])
-  const [destacada, setDestacada]           = useState(null)
-  const [query, setQuery]                   = useState('')
+  const [fiestas, setFiestas]                 = useState([])
+  const [destacada, setDestacada]             = useState(null)
+  const [enCurso, setEnCurso]                 = useState([])
+  const [query, setQuery]                     = useState('')
   const [provinciaActiva, setProvinciaActiva] = useState(null)
 
-  // Cargar categorías
   useEffect(() => {
     getCategorias().then(setCategorias)
+    getFiestasEnCurso().then(setEnCurso)
   }, [])
 
-  // Cargar destacada
   useEffect(() => {
     getFiestasDestacadas().then(data => setDestacada(data[0]))
   }, [])
 
-  // Cargar fiestas con filtros
   useEffect(() => {
     const filters = {}
     if (categoriaActiva)  filters.categoria = categoriaActiva
@@ -39,6 +39,7 @@ export default function Explorar() {
   return (
     <div className="explore">
       <SearchBar value={query} onChange={setQuery} />
+      {enCurso.length > 0 && <EnCurso fiestas={enCurso} />}
       <HeroCard fiesta={destacada} />
       <Categorias
         categorias={categorias}
@@ -46,7 +47,68 @@ export default function Explorar() {
         onSelect={setCategoriaActiva}
       />
       <ProximasFiestas fiestas={fiestas} />
-      <DescubreProvincia onSelect={setProvinciaActiva} activa={provinciaActiva} />    </div>
+      <DescubreProvincia onSelect={setProvinciaActiva} activa={provinciaActiva} />
+    </div>
+  )
+}
+
+function EnCurso({ fiestas }) {
+  const navigate = useNavigate()
+
+  const formatFecha = (f) => {
+    const inicio = f.fecha_inicio?.slice(0, 10)
+    const fin    = f.fecha_fin?.slice(0, 10)
+    if (!fin || inicio === fin) return inicio
+    return `${inicio} — ${fin}`
+  }
+
+  return (
+    <section className="en-curso">
+      <h2 className="en-curso__titulo">En este momento...</h2>
+      <div className="en-curso__carrusel">
+        {fiestas.map(f => {
+          const cat = f.categoria?.toLowerCase().replace(' ', '')
+          return (
+            <div
+              key={f.id}
+              className="en-curso__card"
+              onClick={() => navigate(`/festival/${f.id}`)}
+            >
+              {/* Imagen de fondo */}
+              <img
+                src={IMAGENES_CATEGORIAS[cat] || IMAGENES_CATEGORIAS['feria']}
+                alt={f.nombre}
+                className="en-curso__img"
+              />
+              {/* Overlay */}
+              <div className="en-curso__overlay" />
+
+              {/* Badge categoría */}
+              <span className="en-curso__badge">{f.categoria}</span>
+
+              {/* Info */}
+              <div className="en-curso__info">
+                <h3 className="en-curso__nombre">{f.nombre}</h3>
+                <p className="en-curso__lugar">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                      fill="currentColor"/>
+                  </svg>
+                  {f.municipio}, {f.provincia}
+                </p>
+                <p className="en-curso__fecha">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  {formatFecha(f)}
+                </p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
@@ -56,30 +118,33 @@ function HeroCard({ fiesta }) {
   const categoria = fiesta.categoria?.toLowerCase().replace(' ', '')
 
   return (
-    <div className="hero-card">
-      <img
-        src={IMAGENES_CATEGORIAS[categoria] || IMAGENES_CATEGORIAS['feria']}
-        alt={fiesta.nombre}
-        className="hero-card__img"
-      />
-      <div className="hero-card__overlay">
-        <span className="hero-card__badge">Destacado</span>
-        <h2 className="hero-card__title">{fiesta.nombre}</h2>
-        <p className="hero-card__location">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-              fill="currentColor"/>
-          </svg>
-          {fiesta.municipio} · {fiesta.fecha_inicio?.slice(0, 10)}
-        </p>
-        <button
-          className="hero-card__btn"
-          onClick={() => navigate(`/festival/${fiesta.id}`)}
-        >
-          Ver detalles
-        </button>
+    <section className="hero-section">
+      <h2 className="hero-section__titulo">Evento destacado</h2>
+      <div className="hero-card">
+        <img
+          src={IMAGENES_CATEGORIAS[categoria] || IMAGENES_CATEGORIAS['feria']}
+          alt={fiesta.nombre}
+          className="hero-card__img"
+        />
+        <div className="hero-card__overlay">
+          <span className="hero-card__badge">Destacado</span>
+          <h2 className="hero-card__title">{fiesta.nombre}</h2>
+          <p className="hero-card__location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                fill="currentColor"/>
+            </svg>
+            {fiesta.municipio} · {fiesta.fecha_inicio?.slice(0, 10)}
+          </p>
+          <button
+            className="hero-card__btn"
+            onClick={() => navigate(`/festival/${fiesta.id}`)}
+          >
+            Ver detalles
+          </button>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 
